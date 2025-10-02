@@ -23,27 +23,66 @@ const CardIcon = ({ title }) => {
   return <div className="flex-shrink-0">{icon}</div>;
 };
 
+// The new Time Filter component
+const TimeFilter = ({ filter, setFilter }) => (
+  <div className="flex items-center bg-white/5 p-1 rounded-md text-sm">
+    <button
+      onClick={() => setFilter('weekly')}
+      className={`px-3 py-1 rounded transition-colors duration-200 ${
+        filter === 'weekly' ? 'bg-green-400 text-gray-900 font-semibold' : 'text-gray-400 hover:bg-white/10'
+      }`}
+    >
+      Weekly
+    </button>
+    <button
+      onClick={() => setFilter('all-time')}
+      className={`px-3 py-1 rounded transition-colors duration-200 ${
+        filter === 'all-time' ? 'bg-green-400 text-gray-900 font-semibold' : 'text-gray-400 hover:bg-white/10'
+      }`}
+    >
+      All-Time
+    </button>
+  </div>
+);
 
 function Leaderboard({ title }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [filter, setFilter] = useState('all-time'); // New state for the time filter
 
   useEffect(() => {
     if (title === "Top Languages") {
-      setLoading(false); // The chart component handles its own loading.
+      setLoading(false);
       return;
     }
 
     const controller = new AbortController();
 
     const fetchData = async () => {
-      let apiUrl = "";
-      if (title === "Top Developers") {
-        apiUrl = "https://api.github.com/search/users?q=location:ethiopia&sort=followers&order=desc&per_page=10";
-      } else if (title === "Top Repositories") {
-        apiUrl = "https://api.github.com/search/repositories?q=ethiopia+in:name,description,topics&sort=stars&order=desc&per_page=10";
+      let baseUrl = "";
+      let sortParam = "";
+      let dateFilter = "";
+
+      // Calculate the date for 7 days ago
+      if (filter === 'weekly') {
+        const date = new Date();
+        date.setDate(date.getDate() - 7);
+        const dateString = date.toISOString().split('T')[0];
+        // For new repos/devs, we filter by creation date.
+        // For trending, you'd sort by stars gained in a week, which needs a backend.
+        dateFilter = `+created:>=${dateString}`;
       }
+
+      if (title === "Top Developers") {
+        baseUrl = "https://api.github.com/search/users?q=location:ethiopia";
+        sortParam = "&sort=followers&order=desc";
+      } else if (title === "Top Repositories") {
+        baseUrl = "https://api.github.com/search/repositories?q=ethiopia+in:name,description,topics";
+        sortParam = "&sort=stars&order=desc";
+      }
+      
+      const apiUrl = `${baseUrl}${dateFilter}${sortParam}&per_page=10`;
 
       try {
         setLoading(true);
@@ -59,7 +98,7 @@ function Leaderboard({ title }) {
       } catch (err) {
         if (err.name !== "CanceledError") {
           setError("Failed to fetch data.");
-          console.error(err);
+          console.error(`Error fetching from ${apiUrl}:`, err);
         }
       } finally {
         setLoading(false);
@@ -68,7 +107,7 @@ function Leaderboard({ title }) {
 
     fetchData();
     return () => controller.abort();
-  }, [title]);
+  }, [title, filter]); // Re-run effect when filter changes!
 
   let content;
   if (loading) {
@@ -87,16 +126,19 @@ function Leaderboard({ title }) {
         )
       )
     ) : (
-      <p className="text-center text-gray-400 p-4">No items found.</p>
+      <p className="text-center text-gray-400 p-4">No {title.toLowerCase()} found for this period.</p>
     );
     content = <div className="space-y-2">{listItems}</div>;
   }
 
   return (
     <section className="glass-card rounded-2xl shadow-2xl h-[640px] flex flex-col">
-      <header className="flex items-center gap-4 p-5 border-b border-white/10">
-        <CardIcon title={title} />
-        <h2 className="text-xl font-bold text-white tracking-wide">{title}</h2>
+      <header className="flex items-center justify-between gap-4 p-5 border-b border-white/10">
+        <div className="flex items-center gap-4">
+          <CardIcon title={title} />
+          <h2 className="text-xl font-bold text-white tracking-wide">{title}</h2>
+        </div>
+        {title !== 'Top Languages' && <TimeFilter filter={filter} setFilter={setFilter} />}
       </header>
       <div className="flex-grow min-h-0 overflow-hidden">
         <div className="h-full overflow-y-auto custom-scrollbar p-3">
