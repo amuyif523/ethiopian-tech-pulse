@@ -7,6 +7,7 @@ import TrendingLanguage from './components/TrendingLanguage';
 import UniversityRankings from './components/UniversityRankings';
 import HackathonPage from './components/HackathonPage';
 import OnboardingGuide from './components/OnboardingGuide';
+import DigestSignUp from './components/DigestSignUp'; // Import the new component
 
 // The Dashboard view component, which lays out all the main sections
 const Dashboard = ({ onDeveloperSelect }) => (
@@ -25,6 +26,11 @@ const Dashboard = ({ onDeveloperSelect }) => (
 
     <div className="mt-8">
       <UniversityRankings />
+    </div>
+
+    {/* Render the Digest Sign-Up section here */}
+    <div className="mt-8">
+      <DigestSignUp />
     </div>
   </main>
 );
