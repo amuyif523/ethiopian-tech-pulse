@@ -4,18 +4,17 @@ import LeaderboardItem from "./LeaderboardItem";
 import RepoItem from "./RepoItem";
 import LanguageChart from "./LanguageChart";
 
-// Helper to select an icon based on the title
 const CardIcon = ({ title }) => {
   let icon;
   switch (title) {
     case 'Top Developers':
-      icon = <svg xmlns="http://www.w.org/2000/svg" className="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>;
+      icon = <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>;
       break;
     case 'Top Repositories':
-      icon = <svg xmlns="http://www.w.org/2000/svg" className="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4" /></svg>;
+      icon = <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4" /></svg>;
       break;
     case 'Top Languages':
-      icon = <svg xmlns="http://www.w.org/2000/svg" className="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path strokeLinecap="round" strokeLinejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg>;
+      icon = <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path strokeLinecap="round" strokeLinejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg>;
       break;
     default:
       icon = null;
@@ -30,55 +29,35 @@ const TimeFilter = ({ filter, setFilter }) => (
   </div>
 );
 
-// New Category Filter component
 const categories = ['All', 'Fintech', 'AI', 'Mobile', 'Education', 'Tooling'];
 const CategoryFilter = ({ category, setCategory }) => (
   <div className="px-5 pb-4 border-b border-white/10">
     <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar pb-2">
       {categories.map((cat) => (
-        <button
-          key={cat}
-          onClick={() => setCategory(cat)}
-          className={`px-3 py-1 rounded-full text-sm font-semibold transition-colors duration-200 flex-shrink-0 ${
-            category === cat ? 'bg-green-400 text-gray-900' : 'bg-white/5 text-gray-300 hover:bg-white/10'
-          }`}
-        >
-          {cat}
-        </button>
+        <button key={cat} onClick={() => setCategory(cat)} className={`px-3 py-1 rounded-full text-sm font-semibold transition-colors duration-200 flex-shrink-0 ${category === cat ? 'bg-green-400 text-gray-900' : 'bg-white/5 text-gray-300 hover:bg-white/10'}`}>{cat}</button>
       ))}
     </div>
   </div>
 );
 
-
-function Leaderboard({ title }) {
+function Leaderboard({ title, onDeveloperSelect }) { // Accept the new prop
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState('all-time');
-  const [category, setCategory] = useState('All'); // New state for category filter
+  const [category, setCategory] = useState('All');
 
   useEffect(() => {
     if (title === "Top Languages") {
-      setLoading(false);
-      return;
+      setLoading(false); return;
     }
-
     const controller = new AbortController();
-
     const fetchData = async () => {
-      let baseUrl = "";
-      let sortParam = "";
-      let dateFilter = "";
-      let topicFilter = "";
-
+      let baseUrl = "", sortParam = "", dateFilter = "", topicFilter = "";
       if (filter === 'weekly') {
-        const date = new Date();
-        date.setDate(date.getDate() - 7);
-        const dateString = date.toISOString().split('T')[0];
-        dateFilter = `+created:>=${dateString}`;
+        const date = new Date(); date.setDate(date.getDate() - 7);
+        dateFilter = `+created:>=${date.toISOString().split('T')[0]}`;
       }
-
       if (title === "Top Developers") {
         baseUrl = "https://api.github.com/search/users?q=location:ethiopia";
         sortParam = "&sort=followers&order=desc";
@@ -89,15 +68,11 @@ function Leaderboard({ title }) {
         baseUrl = `https://api.github.com/search/repositories?q=ethiopia${topicFilter}+in:name,description,topics`;
         sortParam = "&sort=stars&order=desc";
       }
-      
       const apiUrl = `${baseUrl}${dateFilter}${sortParam}&per_page=10`;
-
       try {
-        setLoading(true);
-        setError(null);
+        setLoading(true); setError(null);
         const token = import.meta.env.VITE_GITHUB_TOKEN;
         const headers = token ? { Authorization: `token ${token}` } : {};
-        
         const response = await axios.get(apiUrl, { headers, signal: controller.signal });
         setItems(response.data.items || []);
       } catch (err) {
@@ -109,10 +84,9 @@ function Leaderboard({ title }) {
         setLoading(false);
       }
     };
-
     fetchData();
     return () => controller.abort();
-  }, [title, filter, category]); // Re-run effect when category also changes
+  }, [title, filter, category]);
 
   let content;
   if (loading) {
@@ -122,18 +96,19 @@ function Leaderboard({ title }) {
   } else if (title === "Top Languages") {
     content = <LanguageChart />;
   } else {
-    const listItems = items.length > 0 ? (
-      items.map((item, index) =>
-        title === "Top Developers" ? (
-          <LeaderboardItem key={item.id} item={item} index={index} />
-        ) : (
-          <RepoItem key={item.id} item={item} index={index} />
-        )
-      )
+    content = items.length > 0 ? (
+      <div className="space-y-2">
+        {items.map((item, index) =>
+          title === "Top Developers" ? (
+            <LeaderboardItem key={item.id} item={item} index={index} onSelect={onDeveloperSelect} /> // Pass it down
+          ) : (
+            <RepoItem key={item.id} item={item} index={index} />
+          )
+        )}
+      </div>
     ) : (
       <p className="text-center text-gray-400 p-4">No results found for this period/category.</p>
     );
-    content = <div className="space-y-2">{listItems}</div>;
   }
 
   return (
@@ -145,14 +120,9 @@ function Leaderboard({ title }) {
         </div>
         {title !== 'Top Languages' && <TimeFilter filter={filter} setFilter={setFilter} />}
       </header>
-      
-      {/* Conditionally render the category filter */}
       {title === 'Top Repositories' && <CategoryFilter category={category} setCategory={setCategory} />}
-
       <div className="flex-grow min-h-0 overflow-hidden">
-        <div className="h-full overflow-y-auto custom-scrollbar p-3">
-          {content}
-        </div>
+        <div className="h-full overflow-y-auto custom-scrollbar p-3">{content}</div>
       </div>
     </section>
   );
