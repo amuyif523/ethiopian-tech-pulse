@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import Badge from './Badge'; // Import the new Badge component
+import { getDeveloperBadge } from '../utils/badgeLogic'; // Import the badge logic
 
 // Share Icon
 const ShareIcon = () => (
@@ -17,6 +19,7 @@ const CheckIcon = () => (
 
 function LeaderboardItem({ item, index, onSelect, timeFilter }) {
     const [copied, setCopied] = useState(false);
+    const badge = getDeveloperBadge(item); // Check for a badge
 
     const handleShare = async (e) => {
         e.stopPropagation(); // Prevent navigating to profile page
@@ -38,7 +41,7 @@ function LeaderboardItem({ item, index, onSelect, timeFilter }) {
             } else {
                 throw new Error('Web Share API not supported.');
             }
-        } catch { // The 'err' variable has been removed here
+        } catch { // The 'err' variable is removed here
             // Fallback to clipboard if Web Share API fails or is not supported
             navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
             setCopied(true);
@@ -65,7 +68,11 @@ function LeaderboardItem({ item, index, onSelect, timeFilter }) {
                 />
 
                 <div className="flex-1 min-w-0">
-                    <h3 className="text-md font-semibold text-white truncate">{item.login}</h3>
+                    <div className="flex items-center gap-2">
+                        <h3 className="text-md font-semibold text-white truncate">{item.login}</h3>
+                        {/* Conditionally render the badge if it exists */}
+                        {badge && <Badge badge={badge} />}
+                    </div>
                     <p className="text-sm text-gray-400">View Profile</p>
                 </div>
             </button>

@@ -1,4 +1,6 @@
 import React from 'react';
+import Badge from './Badge'; // Import the new Badge component
+import { getRepoBadge } from '../utils/badgeLogic'; // Import the badge logic
 
 // A simple Star icon component for displaying stargazers count
 const StarIcon = () => (
@@ -19,6 +21,7 @@ const StarIcon = () => (
 
 function RepoItem({ item, index }) {
   const description = item.description || "No description provided.";
+  const badge = getRepoBadge(item); // Check for a badge
 
   return (
     <a
@@ -33,7 +36,7 @@ function RepoItem({ item, index }) {
       </div>
 
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
            <img
             src={item.owner?.avatar_url}
             alt={`${item.owner?.login}'s avatar`}
@@ -41,6 +44,8 @@ function RepoItem({ item, index }) {
             loading="lazy"
           />
           <h3 className="text-md font-semibold text-white truncate">{item.full_name}</h3>
+          {/* Conditionally render the badge if it exists */}
+          {badge && <Badge badge={badge} />}
         </div>
 
         <p className="text-sm text-gray-400 mt-2 line-clamp-2">
