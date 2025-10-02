@@ -4,6 +4,7 @@ import LeaderboardItem from "./LeaderboardItem";
 import RepoItem from "./RepoItem";
 import LanguageChart from "./LanguageChart";
 
+// Helper to select a descriptive icon based on the card's title
 const CardIcon = ({ title }) => {
   let icon;
   switch (title) {
@@ -22,6 +23,7 @@ const CardIcon = ({ title }) => {
   return <div className="flex-shrink-0">{icon}</div>;
 };
 
+// UI component for the Weekly/All-Time toggle
 const TimeFilter = ({ filter, setFilter }) => (
   <div className="flex items-center bg-white/5 p-1 rounded-md text-sm">
     <button onClick={() => setFilter('weekly')} className={`px-3 py-1 rounded transition-colors duration-200 ${filter === 'weekly' ? 'bg-green-400 text-gray-900 font-semibold' : 'text-gray-400 hover:bg-white/10'}`}>Weekly</button>
@@ -29,6 +31,7 @@ const TimeFilter = ({ filter, setFilter }) => (
   </div>
 );
 
+// UI component for the repository category filter buttons
 const categories = ['All', 'Fintech', 'AI', 'Mobile', 'Education', 'Tooling'];
 const CategoryFilter = ({ category, setCategory }) => (
   <div className="px-5 pb-4 border-b border-white/10">
@@ -40,7 +43,7 @@ const CategoryFilter = ({ category, setCategory }) => (
   </div>
 );
 
-function Leaderboard({ title, onDeveloperSelect }) { // Accept the new prop
+function Leaderboard({ title, onDeveloperSelect }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -49,15 +52,20 @@ function Leaderboard({ title, onDeveloperSelect }) { // Accept the new prop
 
   useEffect(() => {
     if (title === "Top Languages") {
-      setLoading(false); return;
+      setLoading(false);
+      return;
     }
+
     const controller = new AbortController();
     const fetchData = async () => {
       let baseUrl = "", sortParam = "", dateFilter = "", topicFilter = "";
+      
       if (filter === 'weekly') {
-        const date = new Date(); date.setDate(date.getDate() - 7);
+        const date = new Date();
+        date.setDate(date.getDate() - 7);
         dateFilter = `+created:>=${date.toISOString().split('T')[0]}`;
       }
+
       if (title === "Top Developers") {
         baseUrl = "https://api.github.com/search/users?q=location:ethiopia";
         sortParam = "&sort=followers&order=desc";
@@ -68,9 +76,12 @@ function Leaderboard({ title, onDeveloperSelect }) { // Accept the new prop
         baseUrl = `https://api.github.com/search/repositories?q=ethiopia${topicFilter}+in:name,description,topics`;
         sortParam = "&sort=stars&order=desc";
       }
+      
       const apiUrl = `${baseUrl}${dateFilter}${sortParam}&per_page=10`;
+
       try {
-        setLoading(true); setError(null);
+        setLoading(true);
+        setError(null);
         const token = import.meta.env.VITE_GITHUB_TOKEN;
         const headers = token ? { Authorization: `token ${token}` } : {};
         const response = await axios.get(apiUrl, { headers, signal: controller.signal });
@@ -84,6 +95,7 @@ function Leaderboard({ title, onDeveloperSelect }) { // Accept the new prop
         setLoading(false);
       }
     };
+
     fetchData();
     return () => controller.abort();
   }, [title, filter, category]);
@@ -100,7 +112,7 @@ function Leaderboard({ title, onDeveloperSelect }) { // Accept the new prop
       <div className="space-y-2">
         {items.map((item, index) =>
           title === "Top Developers" ? (
-            <LeaderboardItem key={item.id} item={item} index={index} onSelect={onDeveloperSelect} /> // Pass it down
+            <LeaderboardItem key={item.id} item={item} index={index} onSelect={onDeveloperSelect} />
           ) : (
             <RepoItem key={item.id} item={item} index={index} />
           )
@@ -112,7 +124,7 @@ function Leaderboard({ title, onDeveloperSelect }) { // Accept the new prop
   }
 
   return (
-    <section className="glass-card rounded-2xl shadow-2xl h-[640px] flex flex-col">
+    <section className="glass-card rounded-2xl shadow-2xl h-[85vh] lg:h-[640px] flex flex-col">
       <header className="flex items-center justify-between gap-4 p-5 border-b border-white/10">
         <div className="flex items-center gap-4">
           <CardIcon title={title} />
@@ -120,7 +132,9 @@ function Leaderboard({ title, onDeveloperSelect }) { // Accept the new prop
         </div>
         {title !== 'Top Languages' && <TimeFilter filter={filter} setFilter={setFilter} />}
       </header>
+
       {title === 'Top Repositories' && <CategoryFilter category={category} setCategory={setCategory} />}
+      
       <div className="flex-grow min-h-0 overflow-hidden">
         <div className="h-full overflow-y-auto custom-scrollbar p-3">{content}</div>
       </div>
