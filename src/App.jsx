@@ -6,6 +6,7 @@ import Spotlight from './components/Spotlight';
 import TrendingLanguage from './components/TrendingLanguage';
 import UniversityRankings from './components/UniversityRankings';
 import HackathonPage from './components/HackathonPage';
+import OnboardingGuide from './components/OnboardingGuide';
 
 // The Dashboard view component, which lays out all the main sections
 const Dashboard = ({ onDeveloperSelect }) => (
@@ -29,32 +30,34 @@ const Dashboard = ({ onDeveloperSelect }) => (
 );
 
 function App() {
-  // State to manage the current view (dashboard, profile, or hackathon)
+  // State to manage the current view and any associated data
   const [view, setView] = useState({ page: 'dashboard', data: null });
 
-  // Generic navigation function to switch between main pages
+  // A generic navigation function to switch between the main pages
   const handleNavigate = (page, data = null) => {
     setView({ page, data });
-    window.scrollTo(0, 0); // Scroll to top on page change
+    window.scrollTo(0, 0); // Ensures user starts at the top of the new page
   };
   
-  // Specific handler for navigating to a developer profile
+  // A specific handler for navigating to a developer profile
   const handleSelectDeveloper = (username) => {
     handleNavigate('profile', username);
   };
 
-  // Specific handler for returning to the main dashboard
+  // A specific handler for returning to the main dashboard from any other page
   const handleBackToDashboard = () => {
     handleNavigate('dashboard');
   };
 
-  // Helper function to render the correct page based on the current view state
+  // A helper function to render the correct page component based on the current view state
   const renderCurrentView = () => {
     switch (view.page) {
       case 'profile':
         return <ProfilePage username={view.data} onBack={handleBackToDashboard} />;
       case 'hackathon':
         return <HackathonPage onBack={handleBackToDashboard} />;
+      case 'guide':
+        return <OnboardingGuide onBack={handleBackToDashboard} />;
       case 'dashboard':
       default:
         return <Dashboard onDeveloperSelect={handleSelectDeveloper} />;
