@@ -112,7 +112,7 @@ function Leaderboard({ title, onDeveloperSelect }) {
       <div className="space-y-2">
         {items.map((item, index) =>
           title === "Top Developers" ? (
-            <LeaderboardItem key={item.id} item={item} index={index} onSelect={onDeveloperSelect} />
+            <LeaderboardItem key={item.id} item={item} index={index} onSelect={onDeveloperSelect} timeFilter={filter} />
           ) : (
             <RepoItem key={item.id} item={item} index={index} />
           )
